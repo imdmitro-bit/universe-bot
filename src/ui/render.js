@@ -4,7 +4,8 @@ import {ROLES,TABS} from '../config/roles.js';
 import {act} from '../domain/actions.js';
 import {needsTrailer,phase} from '../domain/status.js';
 import {esc} from '../lib/utils.js';
-import {S,TRIPS,activeUsers,can,myTabs} from '../state.js';
+import {CLOUD} from '../cloud/mode.js';
+import {S,TRIPS,activeUsers,can,myRoles,myTabs,user} from '../state.js';
 import {viewAgents} from '../views/agents.js';
 import {viewBackhauls} from '../views/backhauls.js';
 import {viewBoard} from '../views/board.js';
@@ -23,11 +24,12 @@ export function renderTop(){
   if(!tabs.includes(S.tab))S.tab=tabs[0];
   const cnt={warehouse:TRIPS.filter(needsTrailer).length,backhauls:TRIPS.filter(t=>t.status==='active'&&!t.closed&&['delivered','empty'].includes(phase(t))).length};
   document.getElementById('top').innerHTML=`
-    <div class="brand"><div class="logo">UB</div><div><b>Universe Bot</b><small>${window.TG_NAME?esc(window.TG_NAME):'Mini App · prototype'}</small></div></div>
+    <div class="brand"><div class="logo">UB</div><div><b>Universe Bot</b><small>${CLOUD.on?'Shared data':window.TG_NAME?esc(window.TG_NAME):'Mini App · prototype'}</small></div></div>
     <nav class="tabs" aria-label="Sections">${tabs.map(k=>`<button class="tab ${S.tab===k?'on':''}" data-a="tab" data-k="${k}">${TABS[k]}${cnt[k]?`<span class="cnt">${cnt[k]}</span>`:''}</button>`).join('')}</nav>
     ${can('build')?`<button class="btn sm ghost" data-a="aiOpen" title="Claude reads Rate Confirmations">AI <span class="${aiReady()?'okline':'muted'}">${aiReady()?'on':'off'}</span></button>`:''}
-    <div class="who"><label for="roleSel">Viewing as</label>
-      <select id="roleSel">${activeUsers().map(u=>`<option value="${u.id}" ${S.uid===u.id?'selected':''}>${esc(u.name)} · ${u.roles.map(r=>ROLES[r].label).join(' + ')}</option>`).join('')}</select></div>`;
+    ${CLOUD.on?`<div class="who"><span class="muted">${esc(user())}</span><span>${myRoles().map(r=>ROLES[r].label).join(' + ')}</span></div>`
+    :`<div class="who"><label for="roleSel">Viewing as</label>
+      <select id="roleSel">${activeUsers().map(u=>`<option value="${u.id}" ${S.uid===u.id?'selected':''}>${esc(u.name)} · ${u.roles.map(r=>ROLES[r].label).join(' + ')}</option>`).join('')}</select></div>`}`;
 }
 export function renderView(){
   const v=document.getElementById('view');

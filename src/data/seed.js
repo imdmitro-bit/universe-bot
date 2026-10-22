@@ -4,25 +4,28 @@ import {AGENTS_SAMPLE,CONSIGNEES,TEAM_SAMPLE,DISP_NOTES,NAMES,NE_STOPS,RESCHED_R
 import {act} from '../domain/actions.js';
 import {curIdx,groupMembers,groupsOf,mkStop} from '../domain/stops.js';
 import {MIN,NOW,pick,rint,rnd} from '../lib/utils.js';
-import {AGENTS,DRIVERS,POOL,S,TRIPS,USERS,dispatchers,newDriverGroup,newTrip} from '../state.js';
+import {CLOUD} from '../cloud/mode.js';
+import {AGENTS,DRIVERS,POOL,S,TRIPS,USERS,dispatchers,newDriverGroup,newTrip,user} from '../state.js';
 
-/* Always there: the agents directory. Everything else is demo data, loaded only with ?demo in the URL. */
-export function seedAgents(){
-  AGENTS_SAMPLE.forEach((a,k)=>AGENTS.push({id:'a'+(k+1),...a}));
+/* The agents directory, always there at the start. */
+export function seedAgents(){AGENTS_SAMPLE.forEach((a,k)=>AGENTS.push({id:'a'+(k+1),...a}));}
+/* Sample team for the browser-only prototype. With shared data the team is the real people who logged in through Telegram. */
+export function seedTeam(){
   TEAM_SAMPLE.forEach((u,k)=>USERS.push({id:'u'+(k+1),...u,roles:[...u.roles],status:'active',lastSeen:NOW-rint(5,600)*MIN}));
   S.uid=USERS[0].id;
 }
 /* First start without saved data: three drivers with trips at different steps, to try the flow on real-looking data.
-   Then everything is yours and is kept in this browser. */
-export function seedStarter(){
-  seedAgents();
-  [['James Smith','348','sent','Anna K.'],['Carlos Rivera','227','confirmed','Mark L.'],['Mike Johnson','264','delivering','Oleh P.']].forEach(([name,truck,ph,disp])=>{
-    const d={...newDriverGroup(name,truck),loc:'Home parking — Aurora, IL',ping:NOW-rint(1,9)*MIN};DRIVERS.push(d);seedTrip(d,ph,disp,false);});
+   Then everything is yours. team:false keeps the real team (shared data); disp puts one dispatcher on all three trips. */
+export function seedStarter({team=true,disp=null}={}){
+  if(!AGENTS.length)seedAgents();
+  if(team)seedTeam();
+  [['James Smith','348','sent','Anna K.'],['Carlos Rivera','227','confirmed','Mark L.'],['Mike Johnson','264','delivering','Oleh P.']].forEach(([name,truck,ph,d0])=>{
+    const d={...newDriverGroup(name,truck),loc:'Home parking — Aurora, IL',ping:NOW-rint(1,9)*MIN};DRIVERS.push(d);seedTrip(d,ph,disp||d0,false);});
 }
 /* "Add 10 drivers with trips": appends drivers with trips at different steps to your own data, to play with statuses. */
 export function seedMore(n=10){
   const phases=['refused','sentPrep','ready','trailerMoving','at_yardReady','left_yard','delivering','detention','delivered','empty'];
-  const used=new Set(DRIVERS.map(d=>d.name)),trucks=new Set(DRIVERS.map(d=>d.truck));const pool=dispatchers().length?dispatchers():DISPATCHERS;
+  const used=new Set(DRIVERS.map(d=>d.name)),trucks=new Set(DRIVERS.map(d=>d.truck));const pool=dispatchers().length?dispatchers():CLOUD.on?[user()]:DISPATCHERS;
   const names=NAMES.filter(x=>!used.has(x));const added=[];
   for(let k=0;k<n&&k<names.length;k++){let tr;do{tr=String(rint(201,298));}while(trucks.has(tr));trucks.add(tr);
     const d={...newDriverGroup(names[k],tr),loc:pick(['Home parking — Aurora, IL','Truck stop — Gary, IN','Home parking — Joliet, IL']),ping:NOW-rint(1,9)*MIN};
@@ -30,7 +33,7 @@ export function seedMore(n=10){
   return added;
 }
 export function seed(){
-  seedAgents();
+  seedAgents();seedTeam();
   const trucks=new Set();
   NAMES.forEach((name,i)=>{
     let tr;do{tr=rint(201,298);}while(trucks.has(tr));trucks.add(tr);

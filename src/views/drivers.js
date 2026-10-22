@@ -1,4 +1,5 @@
 /* Driver groups: truck numbers and Telegram tags. */
+import {CLOUD} from '../cloud/mode.js';
 import {phaseLabel} from '../domain/status.js';
 import {esc} from '../lib/utils.js';
 import {DRIVERS,S,activeTrip,can,groupTitle} from '../state.js';
@@ -21,5 +22,5 @@ export function viewDrivers(){
     ${S.expand[d.id]?`<tr data-a="none"><td colspan="5" style="background:var(--bg-2)">${d.members.map(m=>`<div class="memrow"><span>${esc(m.name)}</span><span class="row" style="gap:5px">${['Driver','Dispatcher','Admin','Supervisor'].map(x=>`<button class="tag ${x} tgl ${m.tags.includes(x)?'on':''}" data-a="tagT" data-id="${d.id}" data-m="${esc(m.name)}" data-k="${x}">${x}</button>`).join('')}</span></div>`).join('')}</td></tr>`:''}`;}).join('')}
   </tbody></table></div>
   <p class="foot">Truck # can be changed by Owner, Admin and Supervisor. The group name updates with it.</p>
-  ${can('team')?`<p class="foot">Prototype data is kept in this browser. <button class="btn sm" data-a="seedMore">Add 10 drivers with trips</button> <button class="btn sm ghost danger" data-a="resetData">${S.resetArm>Date.now()?'Confirm: start over':'Start over with 3 sample drivers'}</button></p>`:''}`;
+  ${can('team')?`<p class="foot">${CLOUD.on?'Shared data: everyone in the team sees the same drivers and trips.':'Prototype data is kept in this browser.'} <button class="btn sm" data-a="seedMore">Add 10 drivers with trips</button> <button class="btn sm ghost danger" data-a="resetData">${S.resetArm>Date.now()?'Confirm: start over':'Start over with 3 sample drivers'}</button></p>`:''}`;
 }

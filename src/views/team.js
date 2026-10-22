@@ -1,5 +1,6 @@
 /* Team: who may log in and with which roles. People join with an invite link and log in through Telegram;
    Owner, Admin and Supervisor approve them. A person can have several roles. */
+import {CLOUD} from '../cloud/mode.js';
 import {ROLES} from '../config/roles.js';
 import {ago,esc} from '../lib/utils.js';
 import {S,USERS,can,hasRole} from '../state.js';
@@ -13,12 +14,12 @@ export function viewTeam(){
   return`<div class="row"><h1 class="h1">Team</h1><span class="muted">People who log in to the Mini App. Roles decide what they see; Admin and Supervisor tags in driver groups follow them.</span>
     <span class="sp"></span>${can('team')?'<button class="btn pri" data-a="inviteOpen">Invite</button>':''}</div>
   ${inv?`<div class="card sec" style="margin-top:14px"><div class="row"><span class="h2">Invite link</span><span class="sp"></span><button class="btn sm ghost" data-a="inviteClose">Close</button></div>
-    <p style="margin:8px 0">Send this link in Telegram. The person opens it, starts the bot and lands in the Mini App with "Waiting for approval".</p>
+    <p style="margin:8px 0">${CLOUD.on?'Send this link in Telegram. The person opens the bot, taps the menu button and shows up here as "Waiting for approval". Give them roles and press Approve.':'Send this link in Telegram. The person opens it, starts the bot and lands in the Mini App with "Waiting for approval".'}</p>
     <pre class="whmsg">${esc(inv.link)}</pre>
-    <div class="row" style="margin-top:10px"><span class="note">Prototype: pretend someone opened the link</span><input type="text" id="joinName" placeholder="Name, e.g. Olga" style="width:180px"><input type="text" id="joinUser" placeholder="@username" style="width:150px"><button class="btn sm" data-a="inviteJoin">Join</button></div></div>`:''}
+    ${CLOUD.on?'':`<div class="row" style="margin-top:10px"><span class="note">Prototype: pretend someone opened the link</span><input type="text" id="joinName" placeholder="Name, e.g. Olga" style="width:180px"><input type="text" id="joinUser" placeholder="@username" style="width:150px"><button class="btn sm" data-a="inviteJoin">Join</button></div>`}</div>`:''}
   <div class="tblwrap" style="margin-top:14px"><table class="tbl" style="min-width:900px"><thead><tr><th>Name</th><th>Telegram</th><th>Roles</th><th>Status</th><th>Last seen</th><th></th></tr></thead><tbody>
   ${list.map(u=>{const[l,c]=STATUS[u.status];const self=u.id===S.uid;return`<tr data-a="none" class="${u.status==='pending'?'attn':''}">
-    <td><b>${esc(u.name)}</b>${self?' <span class="tag">you</span>':''}</td><td class="mono muted">@${esc(u.username)}</td>
+    <td><b>${esc(u.name)}</b>${self?' <span class="tag">you</span>':''}</td><td class="mono muted">${u.username?'@'+esc(u.username):'—'}</td>
     <td><div class="row" style="gap:4px">${Object.entries(ROLES).map(([k,r])=>{const on=u.roles.includes(k);const may=can('team')&&canGrant(k)&&!(self&&k==='owner');
       return`<button class="tag tgl ${on?'on':''}" data-a="roleT" data-id="${u.id}" data-k="${k}" ${may?'':'disabled'} aria-pressed="${on}">${r.label}</button>`;}).join('')}</div></td>
     <td><span class="pill ${c}">${l}</span></td><td class="muted">${u.lastSeen?ago(u.lastSeen):'—'}</td>

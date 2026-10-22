@@ -6,14 +6,15 @@ import {act} from './domain/actions.js';
 import {MAX_STOP_PHOTOS,REPORT_TYPES,curIdx,dispTs,fmtDisp,groupMembers,groupsOf,isAgent,labels,retimeMsgs,sortTs,tnum} from './domain/stops.js';
 import {esc,money} from './lib/utils.js';
 import {gps,tick} from './sim/samsara.js';
-import {AGENTS,DRIVERS,POOL,S,USERS,activeTrip,can,canEditTrip,canPrio,drv,groupTitle,isDraftId,newDriverGroup,hasRole,myRoles,myTabs,syncAllGroups,trip,tripNo,user} from './state.js';
+import {AGENTS,DRIVERS,POOL,S,TRIPS,USERS,activeTrip,can,canEditTrip,canPrio,drv,groupTitle,isDraftId,newDriverGroup,hasRole,myRoles,myTabs,syncAllGroups,trip,tripNo,user} from './state.js';
 import {render,renderView,run,toast} from './ui/render.js';
 import {boardRows} from './views/board.js';
 import {addAgentStop,addBlankStop,addNote,addRcFile,isBlank,linkStops,unlinkStop,applyMessageText,releaseLoad,bGroupSet,bStop,builderMessage,clearBuilder,cloneStop,commitBuilder,dropNote,dropStop,extract,moveGroup,msgHead,msgPanel,pickerOptions,placeRow,refreshBuilderBits,removeStop,sendProblem,setAgent,startBuilder,syncTimeFromText} from './views/builder.js';
 import {renderDrawer} from './views/drawer.js';
 import {renderModal} from './views/modal.js';
 import {prepRows} from './views/prep.js';
-import {seedMore} from './data/seed.js';
+import {CLOUD} from './cloud/mode.js';
+import {seedMore,seedStarter} from './data/seed.js';
 import {clearSaved} from './store.js';
 import {canGrant} from './views/team.js';
 import {markSent,whDraft,whStart} from './views/warehouse.js';
@@ -136,7 +137,7 @@ document.addEventListener('click',e=>{
       AGENTS.push({id:'a'+(AGENTS.length+1)+'-'+Date.now().toString(36),...a});renderView();toast(`Agent ${a.code} saved`);break;}
     case'addBlankStop':{const s=addBlankStop();renderView();document.querySelector(`[data-cube="${S.builder.stops.indexOf(s)}"] [data-f=consignee]`)?.focus();break;}
     /* team */
-    case'inviteOpen':S.invite={link:`https://t.me/UniverseBot?start=join_${Math.random().toString(36).slice(2,10)}`};renderView();break;
+    case'inviteOpen':S.invite={link:CLOUD.on?(CLOUD.bot?`https://t.me/${CLOUD.bot}`:'Open the bot in Telegram and tap the menu button'):`https://t.me/UniverseBot?start=join_${Math.random().toString(36).slice(2,10)}`};renderView();break;
     case'inviteClose':S.invite=null;renderView();break;
     case'inviteJoin':{const name=(document.getElementById('joinName')?.value||'').trim();const un=(document.getElementById('joinUser')?.value||'').trim().replace(/^@/,'');
       if(!name)return toast('Enter the name',true);if(USERS.some(u=>u.name.toLowerCase()===name.toLowerCase()))return toast(`${name} is already in the team`,true);
@@ -155,7 +156,10 @@ document.addEventListener('click',e=>{
     case'sort':{const t=el.dataset.t,k=el.dataset.k,cur=S.sort[t];S.sort[t]=!cur||cur.k!==k?{k,dir:1}:cur.dir>0?{k,dir:-1}:null;if(!S.sort[t])delete S.sort[t];
       try{localStorage.setItem('ub.sort',JSON.stringify(S.sort));}catch(e){}renderView();break;}
     case'seedMore':{const added=seedMore(10);render();toast(added.length?`Added ${added.length} drivers with trips at different steps`:'No more sample names left',!added.length);break;}
-    case'resetData':{if(!(S.resetArm>Date.now())){S.resetArm=Date.now()+4000;renderView();break;}clearSaved();location.href=location.pathname;break;}
+    case'resetData':{if(!(S.resetArm>Date.now())){S.resetArm=Date.now()+4000;renderView();break;}
+      // Shared data: drivers, trips and unassigned loads are replaced for everyone; team and agents stay.
+      if(CLOUD.on){S.resetArm=0;S.builder=null;S.drawer=null;DRIVERS.length=0;TRIPS.length=0;POOL.length=0;seedStarter({team:false,disp:user()});render();toast('Started over with 3 sample drivers');break;}
+      clearSaved();location.href=location.pathname;break;}
     case'cancelB':if(S.builder.active){S.builder=null;render();toast('Changes were not sent');}else commitBuilder('auto');break;
     case'clearAll':{const B=S.builder;if(B.clearArm>Date.now()){clearBuilder();renderView();toast('Cleared');}else{B.clearArm=Date.now()+4000;renderView();setTimeout(()=>{if(S.builder===B&&B.clearArm&&B.clearArm<=Date.now()){B.clearArm=0;renderView();}},4100);}break;}
     case'addAgent':{addAgentStop();renderView();document.querySelector('[data-pk=agent]')?.focus();break;}

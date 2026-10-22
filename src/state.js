@@ -1,4 +1,4 @@
-/* In-memory app state and lookups. In production this becomes Supabase. */
+/* In-memory app state and lookups. Inside Telegram these arrays are kept in sync with Firebase (cloud/cloud.js). */
 import {PERM,ROLES} from './config/roles.js';
 
 /* Team: the people who log in through the Mini App (Telegram identity). One person can have several roles;
