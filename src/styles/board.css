@@ -1,0 +1,49 @@
+/* Boards (Preparing, Dispatch): filter tiles with driver popovers, tables, stop progress, activity feed. */
+/* board */
+.sumrow{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 12px}
+.sum{display:flex;flex-direction:column;gap:2px;min-width:118px;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel);cursor:pointer;text-align:left}
+.sum:hover{border-color:var(--line-2)}
+.sum.on{border-color:var(--accent);background:var(--accent-soft)}
+.sum b{font:600 20px var(--f-display);font-variant-numeric:tabular-nums}
+.sum span{font-size:11.5px;color:var(--muted)}
+.sum.attn b{color:var(--crit)}
+.boardwrap{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;align-items:start}
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+table.tbl{width:100%;border-collapse:separate;border-spacing:0;min-width:980px}
+.tbl th{position:sticky;top:0;background:var(--panel);text-align:left;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:500;padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:0}
+.tbl tbody tr{cursor:pointer}
+.tbl tbody tr:hover td{background:var(--panel-2)}
+.tbl tr.attn td:first-child{box-shadow:inset 3px 0 0 var(--crit)}
+.tbl td.muted{white-space:nowrap}
+.prog{display:flex;gap:4px}
+.st{width:30px;height:16px;border-radius:4px;border:1px solid var(--line-2);display:grid;grid-template-columns:repeat(4,1fr);gap:1px;padding:2px;background:var(--bg)}
+.st i{background:var(--line);border-radius:1px}
+.st i.on{background:var(--ok)}
+.st.cur{border-color:var(--accent)}
+.st.cur i.on{background:var(--accent)}
+.feed{padding:12px 14px;position:sticky;top:68px;max-height:calc(100vh - 90px);overflow:auto}
+.feed ol{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column}
+.feed li{display:grid;grid-template-columns:42px minmax(0,1fr);gap:8px;padding:7px 0;border-top:1px solid var(--line);cursor:pointer}
+.feed li:first-child{border-top:0}
+.feed time{color:var(--muted);font-family:var(--f-mono);font-size:11.5px}
+.feed p{margin:0;font-size:12.5px}
+.feed p small{display:block;color:var(--muted)}
+.tbl tr.go td:first-child{box-shadow:inset 3px 0 0 var(--ok)}
+.sum.go b{color:var(--ok)}
+.route{display:flex;flex-wrap:wrap;gap:1px 6px;max-width:380px}
+.route span{white-space:nowrap}
+.route i{font-style:normal;color:var(--muted)}
+.sumw{position:relative}
+.pop{display:none;position:absolute;top:100%;left:0;z-index:9;padding-top:6px;width:min(320px,86vw)}
+.sumw:hover .pop,.sumw:focus-within .pop{display:block}
+.sumw:nth-last-child(-n+2) .pop{left:auto;right:0}
+.pop-in{background:var(--panel-2);border:1px solid var(--line-2);border-radius:10px;padding:5px;max-height:380px;overflow:auto;box-shadow:0 14px 34px rgba(0,0,0,.5);display:flex;flex-direction:column}
+.pop-in button{display:flex;flex-direction:column;align-items:flex-start;text-align:left;background:none;border:0;border-radius:6px;padding:6px 8px;cursor:pointer;gap:1px}
+.pop-in button:hover{background:var(--accent-soft)}
+.pop-in button b{font-weight:500;font-size:12.5px}
+.pop-in button span{font-size:11.5px;color:var(--muted)}
+.thb{background:none;border:0;padding:0;font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:3px}
+.thb:hover,.thb.on{color:var(--fg)}
+.thb .arr{font-size:9px;color:var(--accent);min-width:7px}

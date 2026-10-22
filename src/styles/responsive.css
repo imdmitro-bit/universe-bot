@@ -1,0 +1,6 @@
+/* Breakpoints. Loaded last so they win over the section files. */
+@media (max-width:900px){.mgrid,.appts.three{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:1180px){ .boardwrap{grid-template-columns:minmax(0,1fr)} .feed{position:static;max-height:none} }
+@media (max-width:900px){ .tracks{grid-template-columns:minmax(0,1fr)} .db,.bld{grid-template-columns:minmax(0,1fr)} .side{position:static} .steps{grid-template-columns:repeat(3,minmax(0,1fr))} .fgrid{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:640px){ .brand small,.who label{display:none} .top-in{gap:10px} .hist li{grid-template-columns:70px minmax(0,1fr)} .hist li .src{display:none} .kv,.ss,.acts{margin-left:0} .grid2{grid-template-columns:minmax(0,1fr)} .memrow{grid-template-columns:minmax(0,1fr)} }
+@media (prefers-reduced-motion:reduce){ .shimmer{animation:none} }

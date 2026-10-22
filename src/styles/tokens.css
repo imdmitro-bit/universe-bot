@@ -1,0 +1,14 @@
+/* Design tokens. Dark graphite with a light blue tint; blue only for buttons and selection. */
+:root{
+  color-scheme:dark;
+  --bg:#0E131D; --bg-2:#121926; --panel:#141B28; --panel-2:#1A2232; --line:#1E2636; --line-2:#2B3346;
+  --fg:#E6E9F0; --fg-2:#B9C0CF; --muted:#8E97AB;
+  --accent:#5B8DEF; --accent-2:#3F72D6; --accent-soft:rgba(91,141,239,.14);
+  --ok:#3FB97F; --warn:#F2B544; --crit:#EF5F5F; --teal:#4DB6C4; --violet:#9C8CF0; --idle:#6B7488;
+  --tg-bg:#10161F; --tg-head:#161D29; --tg-bubble:#1A2232; --tg-btn:#22304A; --tg-link:#7FA8F5;
+  --f-display:'Archivo','Helvetica Neue',Arial,sans-serif;
+  --f-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  --gut-l:max(16px, env(safe-area-inset-left, 0px));
+  --gut-r:max(16px, env(safe-area-inset-right, 0px));
+}

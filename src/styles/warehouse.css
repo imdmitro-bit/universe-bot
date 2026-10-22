@@ -1,0 +1,21 @@
+/* Warehouse cards and driver groups. */
+/* warehouse, drivers */
+.grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;margin-top:14px}
+.whc{padding:14px;display:flex;flex-direction:column;gap:10px}
+.mem{display:flex;flex-wrap:wrap;gap:6px;padding:10px 0 2px}
+.memrow{display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);gap:10px;padding:6px 0;border-top:1px solid var(--line);align-items:center}
+.tgl{cursor:pointer;opacity:.45}
+.tgl.on{opacity:1}
+.whc.dim{opacity:.6}
+.whc.dim:hover{opacity:.85}
+.whstops{display:flex;flex-direction:column;gap:2px;font-size:12px;color:var(--fg-2)}
+.whstops b{color:var(--muted);font-weight:600;margin-right:4px}
+.ldrow{border:1px solid var(--line);border-radius:8px;padding:9px 10px;background:var(--bg-2)}
+.ldf{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.ldf input[type=number]{width:78px}
+.whc.justsent{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,var(--panel));transition:background .3s,border-color .3s}
+.sentnote{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:8px;background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok);font-weight:600}
+.sentnote small{font-weight:400;color:var(--fg-2)}
+.whc.flash{animation:whflash 1.8s ease-out}
+@keyframes whflash{0%,40%{border-color:var(--ok);box-shadow:0 0 0 2px color-mix(in srgb,var(--ok) 50%,transparent)}100%{border-color:var(--line);box-shadow:none}}
+@media (prefers-reduced-motion:reduce){.whc.flash{animation:none;border-color:var(--ok)}}

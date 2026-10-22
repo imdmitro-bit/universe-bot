@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Universe Bot</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<!-- Telegram Mini App SDK. Outside Telegram it does nothing; see src/telegram.js -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="src/styles/tokens.css">
+<link rel="stylesheet" href="src/styles/base.css">
+<link rel="stylesheet" href="src/styles/board.css">
+<link rel="stylesheet" href="src/styles/drawer.css">
+<link rel="stylesheet" href="src/styles/telegram.css">
+<link rel="stylesheet" href="src/styles/builder.css">
+<link rel="stylesheet" href="src/styles/warehouse.css">
+<link rel="stylesheet" href="src/styles/modal.css">
+<link rel="stylesheet" href="src/styles/responsive.css">
+</head>
+<body>
+<header class="top"><div class="top-in" id="top"></div></header>
+<main id="view"></main>
+<div id="drawer"></div>
+<div id="modal"></div>
+<div id="toast" class="toast" hidden></div>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
