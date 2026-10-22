@@ -6,7 +6,7 @@
    The trip builder in progress stays on this device only. */
 import {FIREBASE,REGION,SDK} from './config.js';
 import {CLOUD} from './mode.js';
-import {AGENTS,DRIVERS,POOL,S,TRIPS,USERS,hasRole,trip} from '../state.js';
+import {AGENTS,DRIVERS,POOL,S,TG_GROUPS,TRIPS,USERS,hasRole,trip} from '../state.js';
 
 const COLS={drivers:DRIVERS,trips:TRIPS,pool:POOL,agents:AGENTS};
 const last={drivers:new Map(),trips:new Map(),pool:new Map(),agents:new Map()};
@@ -47,7 +47,7 @@ export async function startCloud(h){
     fs.onSnapshot(fs.doc(db,'users',me.id),s=>{const u=s.data();if(u&&u.status!==me.status)location.reload();});
     hooks.gate(me.status,me);return false;
   }
-  await Promise.all([listenTeam(),...Object.keys(COLS).map(listen)]);
+  await Promise.all([listenTeam(),listenGroups(),...Object.keys(COLS).map(listen)]);
   try{const l=JSON.parse(localStorage.getItem(localKey())||'null');if(l){if(l.tab)S.tab=l.tab;if(l.builder)S.builder={...l.builder,stops:(l.builder.stops||[]).filter(s=>!s.extracting)};}}catch(e){}
   // An empty workspace (first login) gets the agents directory and three drivers with trips to try things on.
   if(hasRole('owner')&&!DRIVERS.length&&!TRIPS.length&&!POOL.length&&!AGENTS.length){hooks.seed();await flush();}
@@ -84,6 +84,23 @@ function listenTeam(){
     if(!mine||mine.status!=='active'){location.reload();return;}
     ok();refresh();
   },err=>hooks.toast('Live updates stopped: '+err.message,true)));
+}
+
+/* Telegram groups are written by the bot; the app only links them to drivers (linkGroup). */
+function listenGroups(){
+  return new Promise(ok=>fs.onSnapshot(fs.collection(db,'groups'),snap=>{
+    snap.docChanges().forEach(ch=>{const id=ch.doc.id,i=TG_GROUPS.findIndex(x=>x.chatId===id);
+      if(ch.type==='removed'){if(i>=0)TG_GROUPS.splice(i,1);return;}
+      const g={...ch.doc.data(),chatId:id};if(i>=0)TG_GROUPS[i]=g;else TG_GROUPS.push(g);});
+    ok();refresh();
+  },err=>hooks.toast('Live updates stopped: '+err.message,true)));
+}
+/* One group per driver: linking a group takes the driver off any other group. driverId null unlinks. */
+export async function linkGroup(chatId,driverId){
+  const b=fs.writeBatch(db),at=Date.now();
+  if(driverId)TG_GROUPS.filter(g=>g.driverId===driverId&&g.chatId!==chatId).forEach(g=>b.update(fs.doc(db,'groups',g.chatId),{driverId:null,linkedAt:at,linkedBy:me.id}));
+  b.update(fs.doc(db,'groups',chatId),{driverId:driverId||null,linkedAt:at,linkedBy:me.id});
+  await b.commit();
 }
 
 /* Redraw after someone else's change, but never under the cursor: wait until the field being typed in loses focus. */

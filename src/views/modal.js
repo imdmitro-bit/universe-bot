@@ -3,7 +3,8 @@ import {AI_MODEL_LABEL,aiKey,maskKey} from '../ai/config.js';
 import {TRACKS,trackValue} from '../domain/status.js';
 import {issuedLine,refTxt,tnum,whMessage,whPhotos} from '../domain/stops.js';
 import {esc,fmtD,lb,money} from '../lib/utils.js';
-import {S,drv,findStop,firstName,groupTitle,trip,tripNo,user} from '../state.js';
+import {CLOUD} from '../cloud/mode.js';
+import {S,drv,findStop,firstName,groupTitle,tgGroupOf,trip,tripNo,user} from '../state.js';
 import {who2} from '../ui/components.js';
 
 export function renderModal(){
@@ -52,6 +53,7 @@ export function renderModal(){
         <pre class="issued">Issued by ${esc(firstName(user()))}</pre>
         <div class="kbd" style="margin-top:6px">${B.active?'<button disabled>Acknowledge changes</button>':'<button disabled>Confirm trip</button><button disabled>Refuse</button>'}</div></div>
       <p class="note">${M.sent?`Posted to ${esc(groupTitle(d))}.`:'This is exactly what the driver sees in the group. Edit the text here if needed, the changes are kept in the trip.'}</p>
+      ${CLOUD.on&&!M.sent&&!tgGroupOf(d.id)?`<p class="note late">${esc(d.name)}'s Telegram group is not linked yet, so nothing reaches Telegram. Link it in Driver Groups → Telegram groups.</p>`:''}
       ${M.sent?'':`<div class="row"><span class="sp"></span><button class="btn" data-a="modalClose">Back</button><button class="btn pri" data-a="spSend">Send to ${esc(d.name)}</button></div>`}
     </div>`;return;
   }

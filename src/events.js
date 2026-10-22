@@ -13,6 +13,7 @@ import {addAgentStop,addBlankStop,addNote,addRcFile,isBlank,linkStops,unlinkStop
 import {renderDrawer} from './views/drawer.js';
 import {renderModal} from './views/modal.js';
 import {prepRows} from './views/prep.js';
+import {linkGroup} from './cloud/cloud.js';
 import {CLOUD} from './cloud/mode.js';
 import {seedMore,seedStarter} from './data/seed.js';
 import {clearSaved} from './store.js';
@@ -212,6 +213,8 @@ document.addEventListener('change',e=>{
     if(el.value)t.history.push({ts:Date.now(),who:user(),src:'consolidator',text:'Driver set: '+drv(el.value).name});render();return;}
   if(el.dataset.dd){const t=trip(el.dataset.dd);if(!el.value)return;if(t.status==='draft'){t.dispatcher=el.value;t.history.push({ts:Date.now(),who:user(),src:'consolidator',text:'Dispatcher set: '+el.value});t.updated=Date.now();toast(`#${t.id}: dispatcher ${el.value}`);render();}else{const r=run(t,'dispatcher',{name:el.value});if(r.ok)toast(`#${t.id}: ${el.value} got the Dispatcher tag in the group`);}return;}
   if(el.dataset.bh){run(trip(el.dataset.bh),'bhDispatcher',{name:el.value});return;}
+  if(el.dataset.tglink){const v=el.value||null;linkGroup(el.dataset.tglink,v).then(()=>toast(v?`Group linked to ${drv(v).name}. The bot renames it in Telegram`:'Group unlinked'))
+    .catch(e=>{toast(e.code==='permission-denied'?'Not saved: you have no rights for this change':'Not saved: '+e.message,true);renderView();});return;}
   if(el.dataset.truck){const d=drv(el.dataset.truck);const v=el.value.trim();if(!v||v===d.truck){el.value=d.truck;return;}
     const dup=DRIVERS.find(x=>x!==d&&x.truck===v);if(dup){el.value=d.truck;return toast(`Truck ${v} is already in group "${groupTitle(dup)}"`,true);}
     const old=d.truck;d.truck=v;const t=activeTrip(d);

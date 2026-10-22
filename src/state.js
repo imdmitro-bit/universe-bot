@@ -41,6 +41,10 @@ export function newDriverGroup(name,truck){
   syncGroupMembers(d);return d;
 }
 export const groupTitle=d=>`${d.name} · Truck ${d.truck}`;
+/* Real Telegram groups the bot is in (shared data only; the bot registers them). A group linked to a driver gets its trips. */
+export const TG_GROUPS=[];
+const botIn=g=>['member','administrator','creator','restricted'].includes(g.botStatus||'member');
+export const tgGroupOf=driverId=>TG_GROUPS.filter(g=>g.driverId===driverId&&botIn(g)).sort((a,b)=>(b.linkedAt||0)-(a.linkedAt||0))[0]||null;
 export function newTrip(){let id;do{id=String(tripSeq++);}while(id==='27557'||TRIPS.some(t=>t.id===id));return{id,priority:false,trailerNum:'',ack:null,whDirty:false,driverId:null,dispatcher:'',status:'draft',confirm:null,trailer:null,trailerPrep:null,trailerReady:null,enRouteYard:null,atYard:null,leftYard:null,empty:null,closed:null,backhaul:null,stops:[],created:Date.now(),updated:Date.now(),history:[],chat:[],alerts:[],notes:[]};}
 export function findStop(sid){for(const t of TRIPS){const i=t.stops.findIndex(s=>s.id===sid);if(i>=0)return{t,s:t.stops[i],i};}const s=POOL.find(x=>x.id===sid);return s?{t:null,s,i:-1}:null;}
 export const POOL=[];

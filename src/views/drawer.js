@@ -1,4 +1,5 @@
 /* Trip card: preparing / departure, manifest, stops, history, stop details, Samsara, driver group. */
+import {keyboard} from '../domain/bot.js';
 import {confState,phaseLabel,readyToGo,trailerState,yardState} from '../domain/status.js';
 import {REPORT_TYPES,STOP_LABEL,STOP_ORDER,agentOf,cityST,curIdx,detRisk,dispTs,fmtDisp,glab,groupMembers,isAgent,labels,refTxt,sortTs,spotTxt,spotsTotal,stopDistance,issuedLine,tnum,tripMessage,unitTxt,whMessage} from '../domain/stops.js';
 import {MIN,ago,esc,fmtD,fmtT,hm,initials,lb,money,toInput} from '../lib/utils.js';
@@ -156,15 +157,6 @@ export function manifestCard(t){
       <div><span class="lbl">Message to driver</span><pre class="whmsg">${esc(whMessage(t))}</pre></div></div>`
     :'<p class="note" style="margin:0">Warehouse enters the trailer number, then freight, spots and photos for each stop while loading.</p>'}
   </div>`;
-}
-export function keyboard(t){
-  if(t.closed||t.empty||t.status!=='active')return[];
-  const k=[];if(t.ack&&t.ack.pending)k.push(['ack','Acknowledge changes']);
-  if(t.confirm==='pending')return k.concat([['confirm','Confirm trip'],['refuse','Refuse']]);
-  if(t.confirm==='refused')return k;
-  const ci=curIdx(t);if(ci<0)return k;
-  const s=t.stops[ci];const lv=STOP_ORDER.indexOf(s.status);const gl=glab(t,ci);
-  return k.concat([['checkin',`Stop ${gl}: Checked In`,lv>1],['indoor',`Stop ${gl}: In Door`,lv!==2],['unload',`Stop ${gl}: Unloaded`,lv!==3]]);
 }
 export function groupCard(t,d){
   const as=S.actAs[t.id]||d.name;const m=d.members.find(x=>x.name===as);const kb=keyboard(t);
