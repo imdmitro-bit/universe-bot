@@ -5,6 +5,7 @@
    we write the objects that changed, and changes from other people are put back into the arrays and redrawn.
    The trip builder in progress stays on this device only. */
 import {FIREBASE,REGION,SDK} from './config.js';
+import {refOf} from './files.js';
 import {CLOUD} from './mode.js';
 import {AGENTS,DRIVERS,POOL,S,TG_GROUPS,TRIPS,USERS,hasRole,trip} from '../state.js';
 
@@ -13,8 +14,8 @@ const last={drivers:new Map(),trips:new Map(),pool:new Map(),agents:new Map()};
 const lastTeam=new Map();
 let fs,db,me,hooks,timer=0,writing=false,again=false;
 
-/* Files picked in the browser live as blob: URLs that die with the page; same rule as store.js. */
-const clean=(k,v)=>typeof v==='string'&&v.startsWith('blob:')?(k==='rcUrl'?undefined:null):v;
+/* Files picked in the browser live as blob: URLs that die with the page: save their uploaded reference (files.js) instead. */
+const clean=(k,v)=>typeof v==='string'&&v.startsWith('blob:')?(refOf(v)||(k==='rcUrl'?undefined:null)):v;
 const json=o=>JSON.stringify(o,clean);
 const teamKey=u=>JSON.stringify({roles:u.roles,status:u.status});
 const localKey=()=>'ub.cloud.'+me.id;
@@ -42,7 +43,8 @@ export async function startCloud(h){
   let res;
   try{res=(await functions.httpsCallable(fn,'tgLogin')({initData:window.Telegram.WebApp.initData})).data;}
   catch(e){throw new Error(e.code==='functions/permission-denied'?e.message:'Could not log in: '+(e.message||e.code));}
-  me=res.user;Object.assign(CLOUD,{on:true,user:me,bot:res.bot||''});S.uid=me.id;
+  me=res.user;Object.assign(CLOUD,{on:true,user:me,bot:res.bot||'',call:(name,data,opts)=>functions.httpsCallable(fn,name,opts)(data).then(r=>r.data),
+    flushSoon,redraw:()=>refresh(),toast:hooks.toast});S.uid=me.id;
   if(me.status!=='active'){
     fs.onSnapshot(fs.doc(db,'users',me.id),s=>{const u=s.data();if(u&&u.status!==me.status)location.reload();});
     hooks.gate(me.status,me);return false;

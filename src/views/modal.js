@@ -3,9 +3,10 @@ import {AI_MODEL_LABEL,aiKey,maskKey} from '../ai/config.js';
 import {TRACKS,trackValue} from '../domain/status.js';
 import {issuedLine,refTxt,tnum,whMessage,whPhotos} from '../domain/stops.js';
 import {esc,fmtD,lb,money} from '../lib/utils.js';
+import {fileSrc} from '../cloud/files.js';
 import {CLOUD} from '../cloud/mode.js';
 import {S,drv,findStop,firstName,groupTitle,tgGroupOf,trip,tripNo,user} from '../state.js';
-import {who2} from '../ui/components.js';
+import {who2,photoTile} from '../ui/components.js';
 
 export function renderModal(){
   const el=document.getElementById('modal');const M=S.modal;
@@ -16,7 +17,7 @@ export function renderModal(){
     <div class="modal" role="dialog" aria-label="Send trailer to driver">
       <div class="row mh"><span class="h2">${t.trailer?'Resend':'Send'} trailer to driver</span><span class="sp"></span><button class="btn sm ghost" data-a="modalClose">Cancel</button></div>
       <div class="row" style="gap:14px;margin-bottom:10px">${who2(d)}<span class="muted">Trip <b class="mono" style="color:var(--fg)">#${t.id}</b></span><span class="muted">Group: ${esc(groupTitle(d))}</span></div>
-      <div class="tgprev"><span class="from">Universe Bot</span>${ph.length?`<div class="photos">${ph.map((p,k)=>`<div class="ph" ${p?`style="background-image:url('${p}')"`:''}>${p?'':'Photo '+(k+1)}</div>`).join('')}</div>`:''}<pre>${esc(whMessage(t)+issuedLine(firstName(user())))}</pre></div>
+      <div class="tgprev"><span class="from">Universe Bot</span>${ph.length?`<div class="photos">${ph.map(photoTile).join('')}</div>`:''}<pre>${esc(whMessage(t)+issuedLine(firstName(user())))}</pre></div>
       <p class="note">${ph.length} photo${ph.length===1?'':'s'} and the text go in one message.${t.trailer?' The previous trailer message in the group will be deleted.':''}</p>
       <div class="row"><span class="sp"></span><button class="btn" data-a="modalClose">Cancel</button><button class="btn pri" data-a="whSendNow" data-id="${t.id}">${t.trailer?'Resend':'Send'} to ${esc(d.name)}</button></div>
     </div>`;return;
@@ -57,6 +58,14 @@ export function renderModal(){
       ${M.sent?'':`<div class="row"><span class="sp"></span><button class="btn" data-a="modalClose">Back</button><button class="btn pri" data-a="spSend">Send to ${esc(d.name)}</button></div>`}
     </div>`;return;
   }
+  if(M.kind==='ai'&&CLOUD.on){
+    el.innerHTML=`<div class="scrim" style="z-index:30" data-a="modalClose"></div>
+    <div class="modal" role="dialog" aria-label="AI settings" style="width:min(460px,calc(100% - 32px))">
+      <div class="row mh"><span class="h2">AI</span><span class="sp"></span><button class="btn sm ghost" data-a="modalClose">Close</button></div>
+      <p style="margin:0 0 10px"><span class="okline">On</span> ${AI_MODEL_LABEL} reads uploaded Rate Confirmations on the server. Nothing to set up here.</p>
+      <p class="note">The same PDF is read once for the whole team. The original PDF is kept in the Universe Files channel and opens from the stop.</p>
+    </div>`;return;
+  }
   if(M.kind==='ai'){
     const k=aiKey();
     el.innerHTML=`<div class="scrim" style="z-index:30" data-a="modalClose"></div>
@@ -73,10 +82,12 @@ export function renderModal(){
   }
   const f=findStop(M.sid);if(!f){el.innerHTML='';return;}const s=f.s,t=f.t;
   if(s.rcUrl){
+    const src=fileSrc(s.rcUrl);
+    if(!src){el.innerHTML=`<div class="scrim" style="z-index:30" data-a="modalClose"></div><div class="modal" role="dialog" aria-label="Rate Confirmation"><div class="row mh"><span class="h2">Rate Confirmation</span><span class="mono muted">${esc(s.rcFile)}</span><span class="sp"></span><button class="btn sm ghost" data-a="modalClose">Close</button></div><p class="note">Loading the PDF…</p></div>`;return;}
     el.innerHTML=`<div class="scrim" style="z-index:30" data-a="modalClose"></div>
     <div class="modal wide" role="dialog" aria-label="Rate Confirmation ${esc(s.load)}">
-      <div class="row mh"><span class="h2">Rate Confirmation</span><span class="mono muted">${esc(s.rcFile)}</span><span class="sp"></span><a class="btn sm" href="${esc(s.rcUrl)}" target="_blank" rel="noopener">Open in new tab</a><button class="btn sm ghost" data-a="modalClose">Close</button></div>
-      <iframe class="rcpdf" src="${esc(s.rcUrl)}" title="${esc(s.rcFile)}"></iframe>
+      <div class="row mh"><span class="h2">Rate Confirmation</span><span class="mono muted">${esc(s.rcFile)}</span><span class="sp"></span><a class="btn sm" href="${esc(src)}" target="_blank" rel="noopener">Open in new tab</a><button class="btn sm ghost" data-a="modalClose">Close</button></div>
+      <iframe class="rcpdf" src="${esc(src)}" title="${esc(s.rcFile)}"></iframe>
       <p class="note" style="margin:10px 0 0">Original PDF, read by AI. In production it is stored under load ${esc(s.load)}${t?`, trip #${t.id}`:', currently unassigned'}.</p>
     </div>`;return;
   }

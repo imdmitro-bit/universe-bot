@@ -1,4 +1,5 @@
 /* Shared HTML snippets: truck plate + driver, filter tiles, stop progress, route, appointments. */
+import {fileSrc} from '../cloud/files.js';
 import {S} from '../state.js';
 import {act} from '../domain/actions.js';
 import {STOP_LABEL,STOP_ORDER,cityST,curIdx,groupsOf,labels,spotTxt,unitTxt} from '../domain/stops.js';
@@ -36,3 +37,5 @@ export function applySort(table,rows,get){
   return rows.slice().sort((a,b)=>{const x=val(a),y=val(b);if(x==null&&y==null)return 0;if(x==null)return 1;if(y==null)return -1;
     const c=typeof x==='number'&&typeof y==='number'?x-y:String(x).localeCompare(String(y),'en',{numeric:true,sensitivity:'base'});return c*s.dir;});
 }
+/* One photo tile: a stored photo shows "Loading…" until it arrives; null is a placeholder from sample data. */
+export function photoTile(p,k){const src=fileSrc(p);return`<div class="ph" ${src?`style="background-image:url('${src}')"`:''}>${src?'':p?'Loading…':'Photo '+(k+1)}</div>`;}

@@ -3,7 +3,7 @@ import {trailerState,whSort,whTrips} from '../domain/status.js';
 import {agentOf,cityST,isAgent,fmtDisp,labels,spotsTotal,whMessage,whPhotos} from '../domain/stops.js';
 import {esc} from '../lib/utils.js';
 import {S,can,canPrio,drv,trip,tripNo,user} from '../state.js';
-import {prioTag,who2} from '../ui/components.js';
+import {prioTag,who2,photoTile} from '../ui/components.js';
 import {renderView,run,toast} from '../ui/render.js';
 
 export const whEditing=t=>!!S.whEdit[t.id]||(!!t.trailerPrep&&!t.trailerReady);
@@ -34,12 +34,12 @@ export function whCard(t){
         <select data-wf="unit" data-t="${t.id}" data-s="${s.id}"><option value="plts" ${w.unit==='plts'?'selected':''}>plts</option><option value="crate" ${w.unit==='crate'?'selected':''}>crate</option></select>
         <input type="number" min="0" placeholder="Spots" data-wf="spots" data-t="${t.id}" data-s="${s.id}" value="${esc(w.spots)}">
         <span class="btn sm fileb">Photo<input type="file" accept="image/*" multiple data-wph="${t.id}" data-s="${s.id}"></span><button class="btn sm ghost" data-a="whSamplePh" data-id="${t.id}" data-s="${s.id}">Sample</button></div>
-        ${w.photos.length?`<div class="photos" style="grid-template-columns:repeat(6,1fr)">${w.photos.map((p,j)=>`<div class="ph" ${p?`style="background-image:url('${p}')"`:''}>${p?'':'Photo '+(j+1)}</div>`).join('')}</div>`:''}`}
+        ${w.photos.length?`<div class="photos" style="grid-template-columns:repeat(6,1fr)">${w.photos.map(photoTile).join('')}</div>`:''}`}
     </div>`;}).join('')}
     <div class="row"><span class="note" id="whsp-${t.id}">${sp}/30 spots</span><span class="sp"></span>${t.trailerReady?`<button class="btn ghost" data-a="whCancel" data-id="${t.id}">Cancel</button>`:''}<button class="btn pri" data-a="whSave" data-id="${t.id}">Save trailer</button></div>`;
   }else{
     const ph=whPhotos(t);
-    body=`<pre class="whmsg">${esc(whMessage(t))}</pre>${ph.length?`<div class="photos" style="grid-template-columns:repeat(6,1fr)">${ph.map((p,j)=>`<div class="ph" ${p?`style="background-image:url('${p}')"`:''}>${p?'':'Photo '+(j+1)}</div>`).join('')}</div>`:''}
+    body=`<pre class="whmsg">${esc(whMessage(t))}</pre>${ph.length?`<div class="photos" style="grid-template-columns:repeat(6,1fr)">${ph.map(photoTile).join('')}</div>`:''}
     ${ok?`<div class="row"><span class="note">${spotsTotal(t)}/30 spots · ${ph.length} photos</span><span class="sp"></span><button class="btn" data-a="whEdit" data-id="${t.id}">Edit</button>${t.status==='draft'&&t.trailerSendWithTrip?'<span class="note">Goes with the trip</span>':`<button class="btn ${isSent?'':'pri'}" data-a="whSendOpen" data-id="${t.id}">${t.trailer?'Resend':'Send to driver'}</button>`}</div>`:''}`;
   }
   if(just==='sent')body=`<div class="sentnote">✓ Sent to ${esc(d.name)} · Truck ${esc(d.truck)}<small>Moving to Sent…</small></div>`+body;

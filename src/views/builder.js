@@ -1,6 +1,7 @@
 /* Trip builder: RC upload (read by Claude when a key is set, simulated otherwise), stop editor, message to driver. */
 import {AI_MODEL_LABEL,aiReady} from '../ai/config.js';
 import {readRc} from '../ai/rcReader.js';
+import {registerFile} from '../cloud/files.js';
 import {CONSIGNEES} from '../data/sample.js';
 import {act,grantDispatcher} from '../domain/actions.js';
 import {STOP_LABEL,cityST,fmtDisp,groupMembers,groupsOf,isAgent,labels,mkAgentStop,mkStop,msgRows,parseDispLine,rawAddrKey,refTxt,stopBlockAuto,stopHead,tripMessage} from '../domain/stops.js';
@@ -62,7 +63,7 @@ function loadOwner(B,load){
 }
 /* Claude's JSON for one RC → builder stop rows (one per delivery; the RC rate is split between them). */
 export function rcToStops(r,file){
-  const n=r.deliveries.length,total=Math.round((+r.total_rate||0)*100)/100,url=URL.createObjectURL(file);
+  const n=r.deliveries.length,total=Math.round((+r.total_rate||0)*100)/100,url=URL.createObjectURL(file);registerFile(url,r.fileRef);
   const p=r.pickup,pickup={name:p.facility,addr:p.address,city:cityLine(p),ts:parseLocal(p.date_start),win:winTxt(p.date_start,p.date_end)};
   const rows=r.deliveries.map(d=>{
     const s=mkStop({c:d.facility,addr:d.address,city:cityLine(d)},parseLocal(d.appt_start)||NOW);

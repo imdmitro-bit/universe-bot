@@ -4,7 +4,7 @@ import {confState,phaseLabel,readyToGo,trailerState,yardState} from '../domain/s
 import {REPORT_TYPES,STOP_LABEL,STOP_ORDER,agentOf,cityST,curIdx,detRisk,dispTs,fmtDisp,glab,groupMembers,isAgent,labels,refTxt,sortTs,spotTxt,spotsTotal,stopDistance,issuedLine,tnum,tripMessage,unitTxt,whMessage} from '../domain/stops.js';
 import {MIN,ago,esc,fmtD,fmtT,hm,initials,lb,money,toInput} from '../lib/utils.js';
 import {S,can,canEditTrip,canPrio,dispatchers,drv,groupTitle,trip} from '../state.js';
-import {apptHtml,palletCell,prioTag,srcLabel,who2} from '../ui/components.js';
+import {apptHtml,palletCell,prioTag,srcLabel,who2,photoTile} from '../ui/components.js';
 
 export function renderDrawer(){
   const el=document.getElementById('drawer');
@@ -127,7 +127,7 @@ export function stopDetail(t,d,i,rates){
       ${rep?reportForm(s,i,rep):''}
       ${s.reports.length?`<ul class="notes">${s.reports.map(r=>`<li><span class="tag rep-${r.type}">${REPORT_TYPES[r.type]}</span> ${r.amount?money(r.amount)+' · ':''}${r.hours?r.hours+' h · ':''}${r.plt?r.plt+' plt · ':''}${esc(r.note)} <span class="muted">· ${esc(r.who)} ${fmtD(r.ts)}</span></li>`).join('')}</ul>`:(dsp?'':'<p class="muted">No reports.</p>')}</div>
     <div class="dsec"><span class="lbl">Warehouse photos of this stop${tnum(t)?' · trailer '+esc(tnum(t)):''}</span>
-      ${ph.length?`<div class="photos">${ph.map((p,k)=>`<div class="ph" ${p?`style="background-image:url('${p}')"`:''}>${p?'':'Photo '+(k+1)}</div>`).join('')}</div>`:'<p class="note">No photos yet. Warehouse adds them while loading.</p>'}</div>
+      ${ph.length?`<div class="photos">${ph.map(photoTile).join('')}</div>`:'<p class="note">No photos yet. Warehouse adds them while loading.</p>'}</div>
     <div class="dsec"><span class="lbl">Comment from Warehouse</span><p>${s.whNote||t.whComment?esc(s.whNote||t.whComment):'<span class="muted">—</span>'}</p></div>
     <div class="dsec"><span class="lbl">Consolidator note</span><p>${s.consNote?esc(s.consNote):'<span class="muted">—</span>'}</p></div>
     <div class="dsec"><span class="lbl">Dispatcher notes</span>

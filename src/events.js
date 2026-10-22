@@ -14,6 +14,7 @@ import {renderDrawer} from './views/drawer.js';
 import {renderModal} from './views/modal.js';
 import {prepRows} from './views/prep.js';
 import {linkGroup} from './cloud/cloud.js';
+import {addFile,pendingUploads} from './cloud/files.js';
 import {CLOUD} from './cloud/mode.js';
 import {seedMore,seedStarter} from './data/seed.js';
 import {clearSaved} from './store.js';
@@ -197,7 +198,7 @@ document.addEventListener('click',e=>{
       S.whEdit[tt.id]=false;delete S.whd[tt.id];render();toast(tt.trailer?'Saved. Resend to update the driver.':'Trailer saved. Send it to the driver.');break;}
     case'whSendOpen':{const wt=trip(el.dataset.id);if(wt.status==='draft'){wt.trailerSendWithTrip=true;wt.history.push({ts:Date.now(),who:user(),src:'warehouse',text:'Trailer ready, it goes to the driver together with the trip'});renderView();return toast('The trip is not sent yet. The trailer goes to the driver together with it',false);}}
       if(!trip(el.dataset.id).driverId)return toast('Assign a driver first, the trailer goes to the driver group',true);S.modal={kind:'whSend',tid:el.dataset.id};renderModal();break;
-    case'whSendNow':{const tt=trip(el.dataset.id);const re=!!tt.trailer;const r=act(tt,'trailer',{who:user(),src:'warehouse'});S.modal=null;render();
+    case'whSendNow':{if(pendingUploads())return toast('Photos are still uploading. Send again in a few seconds',true);const tt=trip(el.dataset.id);const re=!!tt.trailer;const r=act(tt,'trailer',{who:user(),src:'warehouse'});S.modal=null;render();
       if(!r.ok)return toast(r.msg,true);if(S.tab==='warehouse')markSent(tt.id);toast(`${re?'Resent':'Sent'} trailer ${tnum(tt)} to ${drv(tt.driverId).name}`);break;}
   }
 });
@@ -221,9 +222,10 @@ document.addEventListener('change',e=>{
     if(t)t.history.push({ts:Date.now(),who:user(),src:'dispatcher',text:`Truck changed ${old} → ${v}. Group renamed to "${groupTitle(d)}"`});
     toast(`Group renamed to "${groupTitle(d)}"`);render();return;}
   if(el.dataset.rev!=null){const t=trip(S.drawer);const f=el.files[0];if(!f)return;const s=t.stops[+el.dataset.rev];const base=s.split?s.loadRate:s.rate;
-    run(t,'revised',{i:+el.dataset.rev,total:Math.round(base*1.06/10)*10,file:f.name});toast(`Revised RC ${f.name} replaced the old one`);return;}
+    run(t,'revised',{i:+el.dataset.rev,total:Math.round(base*1.06/10)*10,file:f.name});
+    const url=addFile(f,'doc',`Revised RC · load ${s.load}`);t.stops.forEach(x=>{if(x.load===s.load)x.rcUrl=url;});toast(`Revised RC ${f.name} replaced the old one`);return;}
   if(el.dataset.wph){const w=whDraft(trip(el.dataset.wph))[el.dataset.s];const files=[...el.files];const room=MAX_STOP_PHOTOS-w.photos.length;
-    files.slice(0,Math.max(0,room)).forEach(f=>w.photos.push(URL.createObjectURL(f)));if(files.length>room)toast(`Up to ${MAX_STOP_PHOTOS} photos per stop`,true);renderView();return;}
+    const tt=trip(el.dataset.wph);files.slice(0,Math.max(0,room)).forEach(f=>w.photos.push(addFile(f,'photo',`Trip #${tt.id} · warehouse photo`)));if(files.length>room)toast(`Up to ${MAX_STOP_PHOTOS} photos per stop`,true);renderView();return;}
   if(el.dataset.wf==='unit'){whDraft(trip(el.dataset.t))[el.dataset.s].unit=el.value;return;}
   if(el.dataset.f&&S.builder){const i=+el.dataset.i,f=el.dataset.f;
     const g=groupMembers(S.builder.stops,i),oldT=fmtDisp(bStop(i));
